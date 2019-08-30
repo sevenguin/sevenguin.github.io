@@ -67,7 +67,23 @@ arc-standard system(Nivre, 2004)，是最流行的transition-based system。
 问题：
 
 1. 在$x^{\{w,t,l\}}$中，如果元素数不够怎么办？
-2. 模型的输入$t_i$到底是什么值？每次batch都不同？预测怎么搞的？$n_l$应该是固定的，因为网络输入参数$W^t$的大小为$\mathbb{R^{d_h\times (d·n_t)}}$也是固定大小；
+
+   **Ans**：会补成特定字符，这份实现中是NULL_TOKEN（\<null\>)，包括leftmost/rightmost children都是如此，如果不足则补成NULL_TOKEN；
+
+2. 模型的输出$t_i$到底是什么值？每次batch都不同？预测怎么搞的？$n_l$应该是固定的，因为网络输入参数$W^t$的大小为$\mathbb{R^{d_h\times (d·n_t)}}$也是固定大小；
+
+   **Ans**: 目标就是0/1/2（分别表示left arc、right arc、shift）；targets的大小就是$n\times 3$，$n$是输入参数数量；$t_i$并不是$n_l$，$t_i$是目标而$n_l$是输入参数中的label，输出的target是这次是什么transition，而label是表示的dep；
+
 3. 一个词leftmost和rightmost到底是什么？是箭头所指的最右最左端的词么（弧线传递？）？
+
+   **Ans**：是弧线传递；但并不是最右或最左（就是传递到头），而是右边或左边一个、两个，如果是leftmost/rightmost(leftmost/rightmost)，则是左边或右边一个词的左边或右边一个；
+
 4. $S_l$到底是什么值？
+
+   **Ans**：$S_l$是dep集合，是依赖词的依赖关系；
+
 5. （-0.01，0.01）使用均匀分布还是正态分布？
+
+   **Ans**：这个实现是正态分布，记得以前看的一本书里面也是正态分布；
+
+代码参看实现：https://github.com/sevenguin/dependency_parsing_tf
