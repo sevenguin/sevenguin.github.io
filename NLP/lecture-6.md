@@ -54,7 +54,7 @@ arc-standard system(Nivre, 2004)，是最流行的transition-based system。
   - the first and second leftmost/rightmost children of the top 2 words on the stack：$lc_1(s_i), rc_1(s_i), lc_2(s_i), rc_2(s_i)，i=1,2$；
   - the leftmost of leftmost / rightmost of rightmost children of the top two words on the stack：$lc_1(lc_1(s_i)), rc_1(rc_1(s_i))，i=1,2$
 - $x^t$: $n_t=18$，是$x^w$里面词的POS tags；
-- $x^l$: $n_l=12$， the corresponding arc labels of words excluding those 6 words on the stack/buffer for $S_l$；$这块没明白$
+- $x^l$: $n_l=12$， the corresponding arc labels of words excluding those 6 words on the stack/buffer for $S_l$；就是排除$s_1, s_2, s_3, b_1, b_2, b_3$这六个词，其他词之间的弧线关系。
 
 训练时，$x^w$可以是预训练好的word vector，而$x^t$和$x^l$会按照分布随机初始化。
 
@@ -85,5 +85,7 @@ arc-standard system(Nivre, 2004)，是最流行的transition-based system。
 5. （-0.01，0.01）使用均匀分布还是正态分布？
 
    **Ans**：这个实现是正态分布，记得以前看的一本书里面也是正态分布；
+   
+6. $x^l$在predict的时候怎么获得？
 
 代码参看实现：https://github.com/sevenguin/dependency_parsing_tf
