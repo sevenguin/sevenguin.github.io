@@ -2,6 +2,8 @@
 
 paper：[A Tutorial on Hidden Markov Models and Selected Applications in Speech Recognition](http://arxiv.org/abs/1603.04713)
 
+P1~P10
+
 ### Markov chain
 
 马尔科夫链是只有状态转移（没有提到观察值）。
@@ -118,5 +120,12 @@ $$
 >    q_t^* = \psi_{t+1}(q^*_{t+1}),t=T-1,T-2,...,1
 >    $$
 
+#### 问题3
 
+同问题2，也是没有最优的模型估计方法，使用EM算法来找到相对最优解。
 
+使用下面算法更新模型：
+
+![1568853026359](..\images\1568853026359.png)
+
+相应的其中的$\alpha,\beta$这些都是通过模型计算，和梯度算法类似，迭代计算最优解。
