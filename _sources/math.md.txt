@@ -1,0 +1,16 @@
+# 数学
+
+## 微积分
+
+### 梯度
+
+计算公示：
+$$
+f'(x) = \frac{df(x)}{dx}
+$$
+[百度](www.baidu.com)
+
+![logo](https://flask.palletsprojects.com/en/2.0.x/_static/flask-icon.png)
+
+[梯度](gradient.md)
+
