@@ -6,3 +6,6 @@ theme: minima
 
 gems:
   - jekyll-mentions
+include:
+  - _static
+  - _sources

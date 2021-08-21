@@ -3,14 +3,14 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to easyapi's documentation!
+目录
 ===================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
    math.md
-   文件同步设计文档.md
+   nlp.md
 
 
 Indices and tables
