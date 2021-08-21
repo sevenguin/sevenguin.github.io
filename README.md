@@ -1,2 +1,2 @@
 # sevenguin.github.io
-my pages
+my pages.
