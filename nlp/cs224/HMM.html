@@ -1,0 +1,237 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
+
+    <title>HMM &#8212; 少年笔记  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="NLP工具集和数据集" href="NLP%E5%B7%A5%E5%85%B7%E9%9B%86%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86.html" />
+    <link rel="prev" title="读书&amp;学习记录" href="../../books/readlist.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section class="tex2jax_ignore mathjax_ignore" id="hmm">
+<h1>HMM<a class="headerlink" href="#hmm" title="Permalink to this headline">¶</a></h1>
+<p>paper：<a class="reference external" href="http://arxiv.org/abs/1603.04713">A Tutorial on Hidden Markov Models and Selected Applications in Speech Recognition</a></p>
+<p>P1~P10</p>
+<section id="markov-chain">
+<h2>Markov chain<a class="headerlink" href="#markov-chain" title="Permalink to this headline">¶</a></h2>
+<p>马尔科夫链是只有状态转移（没有提到观察值）。</p>
+<p>考虑一个系统描述成在任意时间处于N个状态（<span class="math notranslate nohighlight">\(S_1, S_2, ..., S_N\)</span>)之一，如下图所示：</p>
+<p><img alt="1568773754574" src="nlp/cs224/....%5Cimages%5C1568773754574.png" /></p>
+<p>我们使用<span class="math notranslate nohighlight">\(t\)</span>表示时间点，我们标识在时间点<span class="math notranslate nohighlight">\(t\)</span>的实际状态为<span class="math notranslate nohighlight">\(q_t\)</span>，一阶的马尔科夫链假设时间点<span class="math notranslate nohighlight">\(t\)</span>的状态只依赖上个时间点<span class="math notranslate nohighlight">\(t-1\)</span>，即：
+$<span class="math notranslate nohighlight">\(
+P[q_t=S_j|q_{t-1}=S_i, q_{t-2}=S_k,...]=P[q_t=S_j|q_{t-1}=S_i]
+\)</span>$
+上面这个随机过程也可以被称作为显示马尔科夫模型（observable Markov Model），因为这个过程的输出就是在每个时间点的一系列状态，每一个状态对应实际的物理事件。</p>
+<section id="hidden-markov-model">
+<h3>Hidden Markov Model<a class="headerlink" href="#hidden-markov-model" title="Permalink to this headline">¶</a></h3>
+<p>隐形马尔科夫模型（HMM）相比显示的马尔科夫模型，HMM的每个状态对应的是一个概率分布，这个概率分布描述了Observation的各种情况下出现的概率情况。HMM可以看做是一个嵌套的随机过程，在状态随机转移的这个随机过程中嵌套了Observation的随机过程。</p>
+<p>HMM的几个要素如下：</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(N\)</span>：表示的是模型状态的数量，即<span class="math notranslate nohighlight">\(S\)</span>的数量，标识状态为<span class="math notranslate nohighlight">\(S=\{S_1, S_2, ..., S_N\}\)</span>；</p></li>
+<li><p><span class="math notranslate nohighlight">\(M\)</span>：表示的是观测值的数量，即observation的数量，标识观测结果为<span class="math notranslate nohighlight">\(V=\{v_1, v_2, ..., v_M\}\)</span>；</p></li>
+<li><p><span class="math notranslate nohighlight">\(A\)</span>：表示状态转移矩阵，标识为<span class="math notranslate nohighlight">\(A=\{a_{ij}\}\)</span>，而<span class="math notranslate nohighlight">\(a_{ij} = P(q_{t+1}=S_j|q_{t}=S_i)\)</span>，就是在当前时间点状态为<span class="math notranslate nohighlight">\(S_i\)</span>，而下一个时间点状态为<span class="math notranslate nohighlight">\(S_j\)</span>的概率；</p></li>
+<li><p><span class="math notranslate nohighlight">\(B\)</span>：各个状态的观测值的分布，标识为<span class="math notranslate nohighlight">\(B=\{b_j(k)\}，1\le j\le N\)</span>，而<span class="math notranslate nohighlight">\(b_j(k)=P(v_k \text { at time t}|q_t=S_j)\)</span>，其中<span class="math notranslate nohighlight">\(1\le k\le M\)</span>；</p></li>
+<li><p><span class="math notranslate nohighlight">\(\pi\)</span>：表示的是初始状态，标识为<span class="math notranslate nohighlight">\(\pi = \{\pi_i\}，1\le i\le N\)</span>，其中<span class="math notranslate nohighlight">\(\pi_i = P(q_1 = S_i)\)</span>；</p></li>
+</ul>
+<p>给定<span class="math notranslate nohighlight">\(N,M,A,B,\pi\)</span>，就可以生成一大串<span class="math notranslate nohighlight">\(O=O_1,O_2...O_T\)</span>，其中<span class="math notranslate nohighlight">\(O_i\in M\)</span></p>
+<p>一般使用简写<span class="math notranslate nohighlight">\(\lambda=(A,B,\pi)\)</span>来表示隐形马尔科夫模型。</p>
+<p>使用HMM解决的问题可以分为三类：</p>
+<ul class="simple">
+<li><p>问题1：给定<span class="math notranslate nohighlight">\(观测序列O和模型\lambda\)</span>，求<span class="math notranslate nohighlight">\(P(O|\lambda)\)</span>，即给定模型和观测序列，求观测序列出现的概率；</p></li>
+<li><p>问题2：给定<span class="math notranslate nohighlight">\(观测序列O  和模型\lambda\)</span>，求<span class="math notranslate nohighlight">\(Q=q_1,..,q_T\)</span>，即给定模型和观测序列，什么样的状态序列（<span class="math notranslate nohighlight">\(Q\)</span>）可以最好的解释这种观测序列，一般就是找最优的状态序列；</p></li>
+<li><p>问题3：给定<span class="math notranslate nohighlight">\(观测序列O\)</span>，我们如何调整模型<span class="math notranslate nohighlight">\(\lambda\)</span>的参数，使得<span class="math notranslate nohighlight">\(P(O|\lambda)\)</span>的值最大，这其实就是在训练模型，在给定一个观测序列，构建一个最好的模型来拟合现实情况中的观测值。</p></li>
+</ul>
+</section>
+<section id="id1">
+<h3>三个问题的解决方法<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<section id="id2">
+<h4>问题1<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h4>
+<p>对于第一个问题的解决方法，最容易想到的就是直接算，但是复杂度是：
+$<span class="math notranslate nohighlight">\(
+O(2T\times N^T)（(2T-1)N^T次乘法，(N^T-1)次加法
+\)</span>$
+所以需要考虑更加可行的方法，这个方法就是forward-backward procedure。有点类似神经网络里面的前馈和反向传递，而问题1只用使用这个方法中的forward procedure，backward procedure用来处理问题三。</p>
+<p>算法步骤：</p>
+<p><img src="..\..\images\1568777682066.png" alt="1568777682066" style="zoom:80%"/><img src="..\..\images\1568777845684.png" alt="1568777845684" style="zoom:80%;" /></p>
+<p>右边图的下面这幅图就很容易让人联想到神经网络结构了。</p>
+<p>forward相比之前的笨办法，其实就是原来的方法所有方法都是从头开始计算，而这些从头开始计算的方法有很多计算都是重复的，例如：A方法前T-1次选择的状态都是一样的，只有最后一次不一样，如果是笨办法其实就是都从头计算，而上面的办法是只需要计算最后一次差异即可。</p>
+<p>forward和backward都是这个思路，神经网络的反向传递方法也是这个思路来减少计算量，所有梯度计算只计算一次（相同路径）。</p>
+<p>forward variable：
+$<span class="math notranslate nohighlight">\(
+\alpha_t(i) = P(O_1O_2...O_t,q_t=S_i|\lambda)
+\)</span><span class="math notranslate nohighlight">\(
+backward variable:
+\)</span><span class="math notranslate nohighlight">\(
+\beta_t(i) = P(O_{t+1}O_{t+2}...O_T|q_t=S_i,\lambda)
+\)</span>$</p>
+</section>
+<section id="id3">
+<h4>问题2<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h4>
+<p>问题2和问题1不同的是，问题2没有明确的解，是求一个最优解。理解应该类似损失函数只有最优解逼近。而且状态之间是独立的，所以我们可以求单个时间点的状态最优。</p>
+<p>定义变量<span class="math notranslate nohighlight">\(\gamma_t(i)\)</span>表示在时间点<span class="math notranslate nohighlight">\(t\)</span>状态为<span class="math notranslate nohighlight">\(S_i\)</span>的概率：
+$<span class="math notranslate nohighlight">\(
+\gamma_t(i) = P(q_t=S_i|O,\lambda)=\frac{\alpha_t(i)\beta_t(i)}{P(O|\lambda)}\\
+q_t=\arg\max_{1\le i\le N}[\gamma_t(i)],1\le t\le T
+\)</span>$
+因为这里求的是每个时间点的最优值，没有考虑序列出现的概率情况，所以有可能序列中两个相邻的状态之间的状态转换概率为0。</p>
+<p>一个解决方案是，可以考虑修改最优化目标，例如最大化<span class="math notranslate nohighlight">\(q_t\)</span>改为最大化<span class="math notranslate nohighlight">\((q_t, q_{t+1})\)</span>或三元组<span class="math notranslate nohighlight">\((q_t, q_{t+1}, q_{t+2})\)</span>，使用最广泛的还是优化一个最好的状态序列，即最大化<span class="math notranslate nohighlight">\(P(Q|O,\lambda)\)</span>，这个等价于最大化<span class="math notranslate nohighlight">\(P(Q,O|\lambda)\)</span>，一个发现这种最优状态序列的方法是维特比算法。</p>
+<blockquote>
+<div><p><strong>维特比算法</strong></p>
+<p>为了找到给定表现序列<span class="math notranslate nohighlight">\(O=\{O_1, O_2,...,O_T\}\)</span>的最优的状态序列<span class="math notranslate nohighlight">\(Q = \{q_1,q_2,...,q_T\}\)</span>，我们定义：
+$<span class="math notranslate nohighlight">\(
+\delta_t(i) = \max_{p_1,p_2,...,p_{t-1}}P(q_1,q_2,...,q_t=i,O_1,O_2,...,O_t|\lambda)
+\)</span><span class="math notranslate nohighlight">\(
+我们就定义截止到时间\)</span>t<span class="math notranslate nohighlight">\(，最终状态为\)</span>S_i<span class="math notranslate nohighlight">\(，最能得到输出序列的隐藏序列，而下一时刻的各个状态计算值为：
+\)</span><span class="math notranslate nohighlight">\(
+\delta_{t+1}(j) = [\max_i(\delta_t(i)\alpha_{ij})]\times b_j(O_{t+1})
+\)</span><span class="math notranslate nohighlight">\(
+使用\)</span>\psi$来记录每一次选择的状态，所以整个维特比的算法如下：</p>
+<ol class="simple">
+<li><p>首先初始化计算，计算N次：
+$<span class="math notranslate nohighlight">\(
+\delta_1(i) = \pi_i\times b_i(O_{t+1})\\
+\psi_1(i) = 0, 下标表示t=1,i表示下一个状态为S_i的最佳前一个状态
+\)</span>$</p></li>
+<li><p>循环计算：</p></li>
+</ol>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+&gt; \delta_t(j) = [\max_{1\le i\le N}(\delta_{t-1}(i)a_{ij})]\times b_j(O_t)\\
+&gt; \psi_t(j) = \arg\max_{1\le i\le N}[\delta_{t-1}(i)a_{ij}]\\
+&gt; 2\le t\le T， 1\le j\le N
+&gt; \end{split}\]</div>
+<ol class="simple">
+<li><p>计算终止：</p></li>
+</ol>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+&gt; p^* = \max_{1\le i\le N}(\delta_T(i))\\
+&gt; q^*_T = \arg\max_{1\le i\le N}[\delta_T(i)]
+&gt; \end{split}\]</div>
+<ol class="simple">
+<li><p>最终结果：
+$<span class="math notranslate nohighlight">\(
+q_t^* = \psi_{t+1}(q^*_{t+1}),t=T-1,T-2,...,1
+\)</span>$</p></li>
+</ol>
+</div></blockquote>
+</section>
+<section id="id4">
+<h4>问题3<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h4>
+<p>同问题2，也是没有最优的模型估计方法，使用EM算法来找到相对最优解。</p>
+<p>使用下面算法更新模型：</p>
+<p><img alt="1568853026359" src="nlp/cs224/....%5Cimages%5C1568853026359.png" /></p>
+<p>相应的其中的<span class="math notranslate nohighlight">\(\alpha,\beta\)</span>这些都是通过模型计算，和梯度算法类似，迭代计算最优解。</p>
+</section>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">少年笔记</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../math/linear_algrela.html">线性代数</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../books/readlist.html">读书&amp;学习记录</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">HMM</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#markov-chain">Markov chain</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="NLP%E5%B7%A5%E5%85%B7%E9%9B%86%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86.html">NLP工具集和数据集</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lecture-2.html">Word Embedding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lecture-6.html">Dependency Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../other/ML%20Error.html">误差</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../other/python_tools.html">Python tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../other/python_unittest.html">python unittest</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../other/redis.html">Redis</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="../../books/readlist.html" title="previous chapter">读书&amp;学习记录</a></li>
+      <li>Next: <a href="NLP%E5%B7%A5%E5%85%B7%E9%9B%86%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86.html" title="next chapter">NLP工具集和数据集</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, weill.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.0.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../_sources/nlp/cs224/HMM.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

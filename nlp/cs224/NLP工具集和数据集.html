@@ -1,0 +1,191 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
+
+    <title>NLP工具集和数据集 &#8212; 少年笔记  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Word Embedding" href="lecture-2.html" />
+    <link rel="prev" title="HMM" href="HMM.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section class="tex2jax_ignore mathjax_ignore" id="nlp">
+<h1>NLP工具集和数据集<a class="headerlink" href="#nlp" title="Permalink to this headline">¶</a></h1>
+<p>​		介绍一些在NLP各种领域（area）和领域内任务（task）的一些第三方库以及目前在各个领域、任务上使用的数据集。</p>
+<section id="id1">
+<h2>第三方库<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>介绍一些可以快速在项目中使用的NLP，实现NLP任务的第三方开发库。</p>
+<section id="jieba">
+<h3>jieba<a class="headerlink" href="#jieba" title="Permalink to this headline">¶</a></h3>
+<p>类似的分词可以看清华大学的分词库，对各个分词有对比介绍：http://thulac.thunlp.org/</p>
+<p>但是jieba简单易用。</p>
+<p>项目地址：https://github.com/fxsjy/jieba；<a class="reference external" href="https://github.com/yanyiwu/cppjieba">cpp版本</a></p>
+<section id="id2">
+<h4>使用范围<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>分词</p></li>
+<li><p>关键词提取</p>
+<ul>
+<li><p>TF-IDF</p></li>
+<li><p><a class="reference external" href="http://web.eecs.umich.edu/~mihalcea/papers/mihalcea.emnlp04.pdf">TextRank</a></p></li>
+</ul>
+</li>
+<li><p>词性标注</p></li>
+<li><p>并行分析</p></li>
+<li><p>Tokenize</p></li>
+</ul>
+</section>
+</section>
+<section id="fasttext">
+<h3>FastText<a class="headerlink" href="#fasttext" title="Permalink to this headline">¶</a></h3>
+<p>项目地址：<a class="reference external" href="https://fasttext.cc/">https://fasttext.cc</a></p>
+<p>#####使用范围：</p>
+<ul class="simple">
+<li><p>Word representation</p></li>
+<li><p>Text classification</p></li>
+</ul>
+<p>#####附加功能：</p>
+<ul class="simple">
+<li><p>提供很多已经训练好的<a class="reference external" href="https://fasttext.cc/docs/en/crawl-vectors.html">词向量</a>，各种语言；</p></li>
+</ul>
+<p>#####强项：</p>
+<p>未知；</p>
+<p>#####弱项</p>
+<p>至少在自己的数据集上训练的中文词向量是弱于用gensim训练的结果。</p>
+</section>
+<section id="gensim">
+<h3>gensim<a class="headerlink" href="#gensim" title="Permalink to this headline">¶</a></h3>
+<p>一个python库，自动抽取文档语义信息。处理无结构化的文本数据。</p>
+<p>项目地址：https://radimrehurek.com/gensim/intro.html</p>
+<section id="id3">
+<h4>使用范围<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>Word representation（sentence representation、document representation）</p></li>
+<li><p>extract semantic topics</p></li>
+</ul>
+<p>以及基于这些representation和topics的查询，相似度计算等。</p>
+</section>
+</section>
+<section id="spacy">
+<h3>spaCy<a class="headerlink" href="#spacy" title="Permalink to this headline">¶</a></h3>
+<p>项目地址：https://spacy.io/</p>
+<p>更全面的库，可以和gensim、tf，torch、sklearn等无缝结合。</p>
+<p><strong>使用范围：</strong></p>
+<ul class="simple">
+<li><p>分词</p></li>
+<li><p>NER</p></li>
+<li><p>pre-trained word vectors</p></li>
+<li><p>POS</p></li>
+<li><p>dependency parsing</p></li>
+<li><p>sentence segmentation</p></li>
+</ul>
+<p>也实现了<a class="reference external" href="https://radimrehurek.com/gensim/models/fasttext.html#gensim.models.fasttext.FastText">fasttext的word representation</a>算法，</p>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">少年笔记</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../math/linear_algrela.html">线性代数</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../books/readlist.html">读书&amp;学习记录</a></li>
+<li class="toctree-l1"><a class="reference internal" href="HMM.html">HMM</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">NLP工具集和数据集</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id1">第三方库</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="lecture-2.html">Word Embedding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lecture-6.html">Dependency Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../other/ML%20Error.html">误差</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../other/python_tools.html">Python tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../other/python_unittest.html">python unittest</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../other/redis.html">Redis</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="HMM.html" title="previous chapter">HMM</a></li>
+      <li>Next: <a href="lecture-2.html" title="next chapter">Word Embedding</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, weill.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.0.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../_sources/nlp/cs224/NLP工具集和数据集.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

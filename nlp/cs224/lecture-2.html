@@ -1,0 +1,156 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
+
+    <title>Word Embedding &#8212; 少年笔记  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Dependency Parser" href="lecture-6.html" />
+    <link rel="prev" title="NLP工具集和数据集" href="NLP%E5%B7%A5%E5%85%B7%E9%9B%86%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section class="tex2jax_ignore mathjax_ignore" id="word-embedding">
+<h1>Word Embedding<a class="headerlink" href="#word-embedding" title="Permalink to this headline">¶</a></h1>
+<section id="lecture-2">
+<h2>lecture-2<a class="headerlink" href="#lecture-2" title="Permalink to this headline">¶</a></h2>
+<p>这一节主要是讲了Glove算法和如何评估词嵌入技术（metric）。</p>
+<section id="glove">
+<h3>Glove<a class="headerlink" href="#glove" title="Permalink to this headline">¶</a></h3>
+<p>相比其他两种技术1. 共现矩阵分解（最大的一个问题是词频并不能完全展示词相似度，例如：a、the这种对词义影响很小但是频率很大的词却会对词向量的相似度计算产生很大影响，这是不合理的）2. 基于窗口的词向量学习（这种的一个问题就是没有使用到共现矩阵的统计信息，没有全局信息加持）。</p>
+<p>共现矩阵<span class="math notranslate nohighlight">\(\text X\)</span>，即确定窗口下给定一个词，另一个词出现在这个词上下文的次数，<span class="math notranslate nohighlight">\(\text X_{ij}\)</span>，即第<span class="math notranslate nohighlight">\(j\)</span>个词在第<span class="math notranslate nohighlight">\(i\)</span>个词上下文出现的次数。</p>
+<p>Glove和其他的方法不同的一点就是，Glove使用的是概率ratio而不是概率。在word2vec中，优化的目标其实是要使得<span class="math notranslate nohighlight">\(p(w_o|w_c)\)</span>最大，也就是给定词<span class="math notranslate nohighlight">\(w_c\)</span>情况下，上下文词为<span class="math notranslate nohighlight">\(w_o\)</span>的概率要最大。而Glove给出的是：
+$<span class="math notranslate nohighlight">\(
+r=\frac{P_{ik}}{P_{jk}}，P_{ik}=\frac{X_{ik}}{X_i}，就是k词在i当前词上下文中出现的概率
+\)</span><span class="math notranslate nohighlight">\(
+如果\)</span>k<span class="math notranslate nohighlight">\(这个词是\)</span>i<span class="math notranslate nohighlight">\(这个词的上下文，而不是\)</span>j<span class="math notranslate nohighlight">\(这个词的上下文，那\)</span>r$应该是很大，反之很小，而且如果都无关，那就更倾向于于1。</p>
+<p><span class="math notranslate nohighlight">\(r\)</span>值是依赖<span class="math notranslate nohighlight">\(i,j,k\)</span>三个值，其实是依赖三个词，设有函数<span class="math notranslate nohighlight">\(F\)</span>（下面就是靠这种玄学（脑洞）来构造一个<span class="math notranslate nohighlight">\(F\)</span>）：
+$<span class="math notranslate nohighlight">\(
+F(w_i, w_j, \hat w_k) = \frac{P_{ik}}{P_{jk}}，考虑向量线性相关性，而向量减法很容易让人想到，所以有如下公式（玄学1） \\ 
+F((w_i - w_j), \hat w_k) = \frac{P_{ik}}{P_{jk}}，考虑到现在w_i-w_j还是向量，而我们求得的是常量，则有如下转换（玄学2）\\
+F((w_i - w_j)^T \hat w_k) = \frac{P_{ik}}{P_{jk}}，对比等式左右两边，左边可以扩展开如下所示\\
+F((w_i - w_j)^T \hat w_k) = F(w_i^t\hat w_k - w_j^T\hat w_k)，左边是是一个加法的运算，而对应上式是一个乘法运算，\\我们要找到一个同态的F函数来做到这一点，就如下所示（玄学3）\\
+F((w_i - w_j)^T \hat w_k) = \frac{F(w_i^T\hat w_k)}{F(w_j^T\hat w_k)}，同态就是说，在左右等式的集合内，加法运算的结果和乘法运算的结果可以一一\\对应（或群组对应一个）\\
+P_{ik} = F(w_i^T\hat w_k)，F=\exp，按照上面的说法，F只能是\exp函数，则带入到分子中（分母也一样），有：\\
+w_i^T\hat w_k = \log P_{ik} = \log\frac{X_{ik}}{X_i} = \log X_{ik} - \log X_{i}，其实这里也不严谨，\frac{a}{b}=\frac{c}{d}，但是得不出a=b的结果吧，\\这里就是因为左等式相等，右边分子分母就像等得到这个推理结果(玄学4)\\
+\)</span><span class="math notranslate nohighlight">\(
+虽然上面已经四个玄学了，论文中还有一段论述，因为\)</span>w_i^T\hat w_k<span class="math notranslate nohighlight">\(在调换\)</span>i和k<span class="math notranslate nohighlight">\(的值后结果应该保持不变（两个向量内积不变），所以对等式右边也做一下调整（因为\)</span>\log X_i<span class="math notranslate nohighlight">\(不满足这个），所以对右边变化后，等式如下：
+\)</span><span class="math notranslate nohighlight">\(
+w_i^T\hat w_k = \log X_{ik} - b_i - b_k，（玄学5）\\
+即：\log X_{ik} = w_i^T\hat w_k + b_i + b_k，目标函数J为：\\
+J = \sum_{i,j=1}^V w_i^T\hat w_k + b_i + b_k - \log X_{ik}，就是要用矩阵取拟合这个等式
+\)</span><span class="math notranslate nohighlight">\(
+但是这里没有考虑权重，这样频率大的词还是会压制频率小的词权重都一样，下面的权重：
+\)</span><span class="math notranslate nohighlight">\(
+J = \sum_{i,j=1}^V f(X_{ij}) w_i^T\hat w_k + b_i + b_k - \log X_{ik}
+\)</span>$</p>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">少年笔记</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../math/linear_algrela.html">线性代数</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../books/readlist.html">读书&amp;学习记录</a></li>
+<li class="toctree-l1"><a class="reference internal" href="HMM.html">HMM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="NLP%E5%B7%A5%E5%85%B7%E9%9B%86%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86.html">NLP工具集和数据集</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Word Embedding</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#lecture-2">lecture-2</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="lecture-6.html">Dependency Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../other/ML%20Error.html">误差</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../other/python_tools.html">Python tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../other/python_unittest.html">python unittest</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../other/redis.html">Redis</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="NLP%E5%B7%A5%E5%85%B7%E9%9B%86%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86.html" title="previous chapter">NLP工具集和数据集</a></li>
+      <li>Next: <a href="lecture-6.html" title="next chapter">Dependency Parser</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, weill.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.0.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../_sources/nlp/cs224/lecture-2.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

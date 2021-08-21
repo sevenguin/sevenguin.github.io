@@ -7,10 +7,14 @@
 ===================================
 
 .. toctree::
-   :maxdepth: 3
+   :glob:
+   :maxdepth: 2
 
-   math.md
-   nlp.md
+   math/*
+   books/*
+   nlp/*
+   nlp/cs224/*
+   other/*
 
 
 Indices and tables

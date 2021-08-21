@@ -1,0 +1,161 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
+
+    <title>Redis &#8212; 少年笔记  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="python unittest" href="python_unittest.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section class="tex2jax_ignore mathjax_ignore" id="redis">
+<h1>Redis<a class="headerlink" href="#redis" title="Permalink to this headline">¶</a></h1>
+<p>Redis是一个数据结构服务器，但不仅仅是一个简单的键值存储，因为Redis实现了数据结构——允许键包括二进制字符串，hash，set和sorted sets，以及list。这种灵活和快速的结合，使得Redis在很多应用中都是一个理想的工具。</p>
+<section id="an-introduction-to-redis">
+<h2>An Introduction to Redis<a class="headerlink" href="#an-introduction-to-redis" title="Permalink to this headline">¶</a></h2>
+<p>内容：如何安装Redis Server和Client，以及Redis的数据类型。<br />
+何时使用Redis？<br />
+Redis是一种NoSQL存储系统，所以需要考虑何时适合使用NoSQL。</p>
+<ol class="simple">
+<li><p>你的应用和数据更适合NoSQL？一个考虑的方法是，因为性能原因逆规范化，而且不在从关系型数据库的优点中获益（例如ACID属性）；但是得注意NoSQL不保证ACID；NoSQL数据库一般更快更灵活，这个也是考虑的一个因素</p></li>
+<li><p>不要相信hype？综合考虑SQL和NoSQL之间的差异和优缺点，根据自己的应用来对每种属性进行赋权值，最后计算得到最优解。（例如稳定性、可预测性、关系数据——SQL；临时的、动态数据——NoSQL）</p></li>
+</ol>
+<section id="id1">
+<h3>安装<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<p>可以通过source安装也可以直接使用<code class="docutils literal notranslate"><span class="pre">yum</span> <span class="pre">install</span> <span class="pre">redis</span></code>(当然不同版本的Linux（还有Mac）可能具体命令不同)安装</p>
+</section>
+<section id="redis-data-types">
+<h3>Redis Data Types<a class="headerlink" href="#redis-data-types" title="Permalink to this headline">¶</a></h3>
+<p>理解Redis的数据类型更有利于在特定应用中恰当的使用</p>
+<p><code class="docutils literal notranslate"><span class="pre">set</span></code>、<code class="docutils literal notranslate"><span class="pre">get</span></code>、<code class="docutils literal notranslate"><span class="pre">incr</span></code>、<code class="docutils literal notranslate"><span class="pre">incrby</span></code>、<code class="docutils literal notranslate"><span class="pre">decr</span></code>、<code class="docutils literal notranslate"><span class="pre">decrby</span></code> command;<br />
+<code class="docutils literal notranslate"><span class="pre">command</span> <span class="pre">key</span> <span class="pre">(value)</span></code>
+各个命令前面加上<code class="docutils literal notranslate"><span class="pre">h</span></code>(如<code class="docutils literal notranslate"><span class="pre">hset</span></code>)，则表示数据类型为hash（<code class="docutils literal notranslate"><span class="pre">hkey/hval/hgetall/hmset</span></code>获得键、值、键值、一次设置多个键值对（键值相间隔）），而对于circle（set/list类型）来说，则用<code class="docutils literal notranslate"><span class="pre">sadd/smembers</span></code>来增加、查看值。<code class="docutils literal notranslate"><span class="pre">sinter</span></code>可以求两个circle类型值得交集，而<code class="docutils literal notranslate"><span class="pre">sunion</span></code>可以求并。<br />
+<code class="docutils literal notranslate"><span class="pre">keys</span> <span class="pre">*</span></code> 命令可以列出所有数据（键），后面的参数也支持通配符；<code class="docutils literal notranslate"><span class="pre">type</span> <span class="pre">keyname</span></code>可以查看数据的类型是set、list还是hash等;注意使用<code class="docutils literal notranslate"><span class="pre">keys</span></code>时，redis会扫描数据库中所有的键值，这个会有点慢。<br />
+<code class="docutils literal notranslate"><span class="pre">SADD</span> <span class="pre">/nonces/key:dpf43f3p2l4k3l03/timestamp:20110306182600</span> <span class="pre">dji430splmx33448</span></code> 设置一个时间戳<br />
+<code class="docutils literal notranslate"><span class="pre">EXPIRE</span> <span class="pre">/nonces/key:dpf43f3p2l4k3l03/timestamp:20110306182600</span> <span class="pre">1800</span></code>设置这个时间戳过期时间</p>
+</section>
+<section id="oauth-on-top-of-redis">
+<h3>OAuth on Top of Redis<a class="headerlink" href="#oauth-on-top-of-redis" title="Permalink to this headline">¶</a></h3>
+<p>–用Redis来做OAuth
+可以使用python做，然后将源码示例传到github上
+###Pub/Sub Functionality
+–chat system</p>
+</section>
+<section id="inverted-index-text-search">
+<h3>Inverted-Index Text Search<a class="headerlink" href="#inverted-index-text-search" title="Permalink to this headline">¶</a></h3>
+<p>倒排索引文本查找——例如以词为索引，文件、文件位置为值，查找文件</p>
+</section>
+<section id="analytics-and-time-based-data">
+<h3>Analytics and Time-Based Data<a class="headerlink" href="#analytics-and-time-based-data" title="Permalink to this headline">¶</a></h3>
+<p>存储分析结果或者基于时间的数据（例如网站访问情况等）</p>
+</section>
+<section id="job-queue">
+<h3>Job Queue<a class="headerlink" href="#job-queue" title="Permalink to this headline">¶</a></h3>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">少年笔记</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../math/linear_algrela.html">线性代数</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../books/readlist.html">读书&amp;学习记录</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../nlp/cs224/HMM.html">HMM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../nlp/cs224/NLP%E5%B7%A5%E5%85%B7%E9%9B%86%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86.html">NLP工具集和数据集</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../nlp/cs224/lecture-2.html">Word Embedding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../nlp/cs224/lecture-6.html">Dependency Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ML%20Error.html">误差</a></li>
+<li class="toctree-l1"><a class="reference internal" href="python_tools.html">Python tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="python_unittest.html">python unittest</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Redis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#an-introduction-to-redis">An Introduction to Redis</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="python_unittest.html" title="previous chapter">python unittest</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, weill.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.0.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/other/redis.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,190 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
+
+    <title>Dependency Parser &#8212; 少年笔记  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="误差" href="../../other/ML%20Error.html" />
+    <link rel="prev" title="Word Embedding" href="lecture-2.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section class="tex2jax_ignore mathjax_ignore" id="dependency-parser">
+<h1>Dependency Parser<a class="headerlink" href="#dependency-parser" title="Permalink to this headline">¶</a></h1>
+<p>这篇主要是介绍论文<a class="reference external" href="https://nlp.stanford.edu/pubs/emnlp2014-depparser.pdf">A Fast and Accurate Dependency Parser using Neural Networks</a></p>
+<p>Greedy Transition-based Dependency Parsing算法：</p>
+<p>arc-standard system(Nivre, 2004)，是最流行的transition-based system。</p>
+<blockquote>
+<div><p>在这个系统中，假设有：</p>
+<p>configuration c = (s, b, A)，s: 一个stack；b：一个buffer；A：一组依赖弧；</p>
+<p>步骤：</p>
+<ol class="simple">
+<li><p>对c进行初始化：对于一个语句<span class="math notranslate nohighlight">\(w_1,...,w_n\)</span>，<span class="math notranslate nohighlight">\(s=[\text {ROOT}]\)</span>，<span class="math notranslate nohighlight">\(b=[w_1,...,w_n]\)</span>，<span class="math notranslate nohighlight">\(A=\emptyset\)</span>，如果b为空并且stack值包含一个节点ROOT，则终止；</p></li>
+<li><p>标识说明<span class="math notranslate nohighlight">\(s_i\)</span>：<span class="math notranslate nohighlight">\(s_i(i=1,2,...)\)</span>作为<span class="math notranslate nohighlight">\(i^{th}\)</span>（第i个）stack中最顶部的元素；</p></li>
+<li><p>标识说明<span class="math notranslate nohighlight">\(b_i\)</span>：<span class="math notranslate nohighlight">\(b_i(i=1,2,...)\)</span>作为<span class="math notranslate nohighlight">\(b^{th}\)</span>（第i个）buffer中的元素；</p></li>
+<li><p>进行转移，分三类，LEFT-ARC(<span class="math notranslate nohighlight">\(l\)</span>)，RIGHT_ARC(<span class="math notranslate nohighlight">\(l\)</span>)，SHIFT：</p></li>
+<li><p>LEFT-ARC(<span class="math notranslate nohighlight">\(l\)</span>)：增加弧线（弧线标签为<span class="math notranslate nohighlight">\(l\)</span>）<span class="math notranslate nohighlight">\(s_1\to s_2\)</span>，并且将<span class="math notranslate nohighlight">\(s_2\)</span>从stack中移除，进行此次转移的前提条件是<span class="math notranslate nohighlight">\(|s|\ge 2\)</span></p></li>
+<li><p>RIGHT-ARC(<span class="math notranslate nohighlight">\(l)\)</span>：增加弧线（弧线标签为<span class="math notranslate nohighlight">\(l\)</span>）<span class="math notranslate nohighlight">\(s_2\to s_1\)</span>，并且将<span class="math notranslate nohighlight">\(s1\)</span>从stack中移除，进行此次此次转移的前提条件是<span class="math notranslate nohighlight">\(|s|\ge 2\)</span>；</p></li>
+<li><p>SHIFT：将<span class="math notranslate nohighlight">\(b_1\)</span>从buffer中挪到stack，进行词操作的前提条件是<span class="math notranslate nohighlight">\(|b|\ge 1\)</span>。</p></li>
+</ol>
+<p>有两点点需要注意的是：</p>
+<ol class="simple">
+<li><p>在dependency中，不能存在环型依赖，也不能存在交叉依赖，例如下图中，如果good到has还有一个向左的箭头，那就出现了环形依赖（has-&gt;control, control-&gt;good-&gt;has)；如果有control到He的向左箭头，那就出现了交叉，算法也会失效；</p></li>
+<li><p>在最后才进行ROOT到<span class="math notranslate nohighlight">\(s_1\)</span>的依赖操作；</p></li>
+</ol>
+<p><img alt="1567131045009" src="nlp/cs224/....%5Cimages%5C1567131045009.png" /></p>
+<p>总共会有<span class="math notranslate nohighlight">\(|\mathcal{T}|=2N_l+1\)</span>次转换，其中<span class="math notranslate nohighlight">\(N_l\)</span>是标签的总数，可以这么理解：每一次的向左或者向右的弧线都伴随着两次转换，一次是shift，一次是画弧线。额外的一次就是初始化的操作。</p>
+<p>而如何来判断进行哪个transition就是一个问题，先来看看我们有哪些数据：所有的词和他们对应的POS tag（例如：has\VBZ)；2. 弧线；3. 一个词在转换前在stack和buffer中的位置。</p>
+<p>常见的方法是使用stack和buffer中1~3个词以及他们的POS和弧线标签，组成指示特征，用这些特征去做训练，存在的问题就是：稀疏；手工特征会不完整，词越多越稀疏，越少越不完整；由于稀疏，计算起来比较昂贵；</p>
+</div></blockquote>
+<p>本模型就是基于上面指示特征的问题，借鉴word2vec的方法，采用新的representation方法来学习tag、pos的向量表示，将稀疏的特征矩阵换换位dense matrix。</p>
+<p>模型的输入就是<span class="math notranslate nohighlight">\((c_i, t_i)\)</span>，<span class="math notranslate nohighlight">\(c_i\)</span>就是在第<span class="math notranslate nohighlight">\(i\)</span>词转换前的一个configuration（即stack、buffer状态）；<span class="math notranslate nohighlight">\(t_i\)</span>就是第<span class="math notranslate nohighlight">\(i\)</span>此具体的转换操作（<span class="math notranslate nohighlight">\(t_i\in \mathcal {T}\)</span>，这里有个疑问，每个sentence的<span class="math notranslate nohighlight">\(\mathcal T\)</span>应该都是不一样的，因为每个语句的依赖数量是不一样的，即<span class="math notranslate nohighlight">\(N_l\)</span>是不一样，这个值是取最大值还是每次batch可以不同，而且在预测时如何做呢？target的大小不固定，按理<span class="math notranslate nohighlight">\(t_i\)</span>只需要表示三个值即可：shift/left/right）。网络架构示意图：</p>
+<p><img alt="1567132155242" src="nlp/cs224/....%5Cimages%5C1567132155242.png" /></p>
+<p>上面省了一步就是投射，输入肯定是词和tag、arc label的one-hot向量，投射成<span class="math notranslate nohighlight">\(x\)</span>的嵌入向量表示。</p>
+<p>一些计算步骤：</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(x^w=[e_{w_1}^w;e_{w_2}^w;...;e_{w_{n_w}}^w]\)</span>，表示词向量输入，拼接起来的<span class="math notranslate nohighlight">\(n_w\)</span>个词的向量，其他两个也类似；</p></li>
+<li><p><span class="math notranslate nohighlight">\(W_1^w\in \mathbb{R^{d_h\times (d·n_w)}}\)</span>，其他两个类似，也只是<span class="math notranslate nohighlight">\(n_w\)</span>换一下，其中<span class="math notranslate nohighlight">\(d\)</span>是词向量的维度，其实这三类的表示向量维度可以不同。</p></li>
+</ul>
+<p>值得注意的是，这上面的<span class="math notranslate nohighlight">\(h\)</span>的激活函数使用的是cube，而不是传统的tanh等激活函数，解释是，这样就会有<span class="math notranslate nohighlight">\(x^w\times x^t\times x^l\)</span>的存在，变相的增加了是三个元素组合的特征。</p>
+<p>其中<span class="math notranslate nohighlight">\(x^w\)</span>是词的向量表示（论文中大小是<span class="math notranslate nohighlight">\(n_w\)</span>=18个元素）；<span class="math notranslate nohighlight">\(x^t\)</span>是tag的向量表示（论文中大小是<span class="math notranslate nohighlight">\(n_w\)</span>=18个元素）；<span class="math notranslate nohighlight">\(x^l\)</span>是label的向量表示（12），具体元素取值见下面描述：</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(x^w\)</span>: <span class="math notranslate nohighlight">\(n_w=18\)</span>:</p>
+<ul>
+<li><p>top 3 words on stack and buffer：<span class="math notranslate nohighlight">\(s_1, s_2, s_3, b_1, b_2, b_3\)</span>;</p></li>
+<li><p>the first and second leftmost/rightmost children of the top 2 words on the stack：<span class="math notranslate nohighlight">\(lc_1(s_i), rc_1(s_i), lc_2(s_i), rc_2(s_i)，i=1,2\)</span>；</p></li>
+<li><p>the leftmost of leftmost / rightmost of rightmost children of the top two words on the stack：<span class="math notranslate nohighlight">\(lc_1(lc_1(s_i)), rc_1(rc_1(s_i))，i=1,2\)</span></p></li>
+</ul>
+</li>
+<li><p><span class="math notranslate nohighlight">\(x^t\)</span>: <span class="math notranslate nohighlight">\(n_t=18\)</span>，是<span class="math notranslate nohighlight">\(x^w\)</span>里面词的POS tags；</p></li>
+<li><p><span class="math notranslate nohighlight">\(x^l\)</span>: <span class="math notranslate nohighlight">\(n_l=12\)</span>， the corresponding arc labels of words excluding those 6 words on the stack/buffer for <span class="math notranslate nohighlight">\(S_l\)</span>；就是排除<span class="math notranslate nohighlight">\(s_1, s_2, s_3, b_1, b_2, b_3\)</span>这六个词，其他词之间的弧线关系。</p></li>
+</ul>
+<p>训练时，<span class="math notranslate nohighlight">\(x^w\)</span>可以是预训练好的word vector，而<span class="math notranslate nohighlight">\(x^t\)</span>和<span class="math notranslate nohighlight">\(x^l\)</span>会按照分布随机初始化。</p>
+<p>模型的损失函数是：</p>
+<p><img alt="1567133602479" src="nlp/cs224/....%5Cimages%5C1567133602479.png" /></p>
+<p>问题：</p>
+<ol>
+<li><p>在<span class="math notranslate nohighlight">\(x^{\{w,t,l\}}\)</span>中，如果元素数不够怎么办？</p>
+<p><strong>Ans</strong>：会补成特定字符，这份实现中是NULL_TOKEN（&lt;null&gt;)，包括leftmost/rightmost children都是如此，如果不足则补成NULL_TOKEN；</p>
+</li>
+<li><p>模型的输出<span class="math notranslate nohighlight">\(t_i\)</span>到底是什么值？每次batch都不同？预测怎么搞的？<span class="math notranslate nohighlight">\(n_l\)</span>应该是固定的，因为网络输入参数<span class="math notranslate nohighlight">\(W^t\)</span>的大小为<span class="math notranslate nohighlight">\(\mathbb{R^{d_h\times (d·n_t)}}\)</span>也是固定大小；</p>
+<p><strong>Ans</strong>: 目标就是0/1/2（分别表示left arc、right arc、shift）；targets的大小就是<span class="math notranslate nohighlight">\(n\times 3\)</span>，<span class="math notranslate nohighlight">\(n\)</span>是输入参数数量；<span class="math notranslate nohighlight">\(t_i\)</span>并不是<span class="math notranslate nohighlight">\(n_l\)</span>，<span class="math notranslate nohighlight">\(t_i\)</span>是目标而<span class="math notranslate nohighlight">\(n_l\)</span>是输入参数中的label，输出的target是这次是什么transition，而label是表示的dep；</p>
+</li>
+<li><p>一个词leftmost和rightmost到底是什么？是箭头所指的最右最左端的词么（弧线传递？）？</p>
+<p><strong>Ans</strong>：是弧线传递；但并不是最右或最左（就是传递到头），而是右边或左边一个、两个，如果是leftmost/rightmost(leftmost/rightmost)，则是左边或右边一个词的左边或右边一个；</p>
+</li>
+<li><p><span class="math notranslate nohighlight">\(S_l\)</span>到底是什么值？</p>
+<p><strong>Ans</strong>：<span class="math notranslate nohighlight">\(S_l\)</span>是dep集合，是依赖词的依赖关系；</p>
+</li>
+<li><p>（-0.01，0.01）使用均匀分布还是正态分布？</p>
+<p><strong>Ans</strong>：这个实现是正态分布，记得以前看的一本书里面也是正态分布；</p>
+</li>
+<li><p><span class="math notranslate nohighlight">\(x^l\)</span>在predict的时候怎么获得？</p></li>
+</ol>
+<p>代码参看实现：https://github.com/sevenguin/dependency_parsing_tf</p>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">少年笔记</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../math/linear_algrela.html">线性代数</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../books/readlist.html">读书&amp;学习记录</a></li>
+<li class="toctree-l1"><a class="reference internal" href="HMM.html">HMM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="NLP%E5%B7%A5%E5%85%B7%E9%9B%86%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86.html">NLP工具集和数据集</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lecture-2.html">Word Embedding</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Dependency Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../other/ML%20Error.html">误差</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../other/python_tools.html">Python tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../other/python_unittest.html">python unittest</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../other/redis.html">Redis</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="lecture-2.html" title="previous chapter">Word Embedding</a></li>
+      <li>Next: <a href="../../other/ML%20Error.html" title="next chapter">误差</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, weill.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.0.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../_sources/nlp/cs224/lecture-6.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
