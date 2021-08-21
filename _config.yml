@@ -2,7 +2,7 @@ title: Sevenguin.GitHub.io
 description: my pages
 google_analytics: 
 show_downloads: true
-theme: jekyll-theme-minima
+theme: minima
 
 gems:
   - jekyll-mentions
